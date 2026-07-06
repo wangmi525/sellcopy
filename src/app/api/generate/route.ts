@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateCopy, generateBulk } from '@/lib/groq';
-import { createClient } from '@/lib/supabase-server';
+import { createClientForRequest } from '@/lib/supabase-server';
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      const supabase = await createClient();
+      const supabase = createClientForRequest(req.headers);
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from('generations').insert({

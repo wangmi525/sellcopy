@@ -1,18 +1,18 @@
 'use client';
 
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-let client: ReturnType<typeof createBrowserClient> | null = null;
+let client: SupabaseClient | null = null;
 
-export function getSupabase() {
+export function getSupabase(): SupabaseClient {
   if (typeof window === 'undefined') {
-    return createBrowserClient(
+    return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
   }
   if (!client) {
-    client = createBrowserClient(
+    client = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );

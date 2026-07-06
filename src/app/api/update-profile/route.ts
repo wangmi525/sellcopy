@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-server';
+import { NextResponse, type NextRequest } from 'next/server';
+import { createClientForRequest } from '@/lib/supabase-server';
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClientForRequest(request.headers);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { name } = await req.json();
+    const { name } = await request.json();
     const { error } = await supabase.auth.updateUser({ data: { full_name: name } });
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 

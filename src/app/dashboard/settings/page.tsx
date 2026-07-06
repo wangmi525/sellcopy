@@ -22,7 +22,6 @@ export default function SettingsPage() {
         setEmail(user.email || '')
       }
     })
-    })
   }, [])
 
   const updateName = async () => {
