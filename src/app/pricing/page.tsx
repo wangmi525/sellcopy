@@ -1,17 +1,12 @@
 import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
-import Generator from '@/components/Generator';
 import Footer from '@/components/Footer';
 
-export default function Home() {
+export default function PricingPage() {
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
-      <Hero />
-      <Features />
-      <Generator />
+      <div className="pt-24" />
       <Pricing />
       <Footer />
     </main>
