@@ -15,7 +15,8 @@ export default function SettingsPage() {
   const supabase = getSupabase()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
       if (user) {
         setName(user.user_metadata?.full_name || '')
         setEmail(user.email || '')
