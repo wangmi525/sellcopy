@@ -146,6 +146,17 @@ function Tool() {
   const handleGenerate = async () => {
     const data = getFormData();
     if (!data.input) return;
+
+    // Client-side daily limit check
+    const today = new Date().toDateString();
+    const usageKey = 'sellcopy_usage_' + today;
+    const used = parseInt(localStorage.getItem(usageKey) || '0');
+    const plan = 'free'; // TODO: fetch from API
+    if (plan === 'free' && used >= 3) {
+      setError('Daily free limit reached (3/day). Upgrade to Pro for unlimited generations.');
+      return;
+    }
+
     setLoading(true); setError(''); setResult(null);
     try {
       const session = await getSupabase().auth.getSession();
@@ -156,7 +167,11 @@ function Tool() {
         body: JSON.stringify(data)
       });
       const r = await res.json();
-      if (r.error) setError(r.error); else setResult(r);
+      if (r.error) setError(r.error);
+      else {
+        setResult(r);
+        localStorage.setItem(usageKey, String(used + 1));
+      }
     } catch { setError('Generation failed.'); }
     finally { setLoading(false); }
   };
