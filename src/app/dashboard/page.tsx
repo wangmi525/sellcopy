@@ -27,13 +27,50 @@ export default function DashboardPage() {
               <Link href="/dashboard/settings" className="px-4 py-1.5 text-[12px] text-gray-500 hover:text-gray-700 rounded-md transition-colors">Settings</Link>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /><span className="text-[11px] font-semibold text-blue-700">{usage?.plan === 'free' ? 'Free Plan' : usage?.plan || 'Free'}</span>{usage?.limit > 0 && <span className="text-[11px] text-blue-500">{usage?.remaining}/{usage?.limit}</span>}</div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center"><span className="text-white text-[12px] font-bold">U</span></div>
+          <div className="flex items-center gap-4 relative">
+            <Link href="#pricing" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /><span className="text-[11px] font-semibold text-blue-700">{usage?.plan === 'free' ? 'Free Plan' : usage?.plan || 'Free'}</span>{usage?.limit > 0 && <span className="text-[11px] text-blue-500">{usage?.remaining}/{usage?.limit}</span>}</Link>
+            <MenuButton />
           </div>
         </div>
       </nav>
       <Tool />
+    </div>
+  );
+}
+
+function MenuButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(!open)} className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center hover:ring-2 hover:ring-blue-500/20 transition-all">
+        <span className="text-white text-[12px] font-bold">U</span>
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-12 w-52 bg-white rounded-xl border border-gray-200 shadow-xl z-50 py-2">
+            <div className="px-4 py-2 border-b border-gray-100"><p className="text-[13px] font-semibold text-gray-900">Account</p></div>
+            <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-gray-600 hover:bg-gray-50 transition-colors" onClick={() => setOpen(false)}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543-.826-3.31 2.37-2.37.997.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Settings
+            </Link>
+            <Link href="/dashboard/history" className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-gray-600 hover:bg-gray-50 transition-colors" onClick={() => setOpen(false)}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              History
+            </Link>
+            <Link href="#pricing" className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-gray-600 hover:bg-gray-50 transition-colors" onClick={() => setOpen(false)}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Upgrade Plan
+            </Link>
+            <div className="border-t border-gray-100 mt-1 pt-1">
+              <button onClick={async () => { const { getSupabase } = await import('@/lib/supabase-client'); getSupabase().auth.signOut().then(() => { window.location.href = '/'; }); }} className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-600 hover:bg-red-50 transition-colors w-full text-left">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
