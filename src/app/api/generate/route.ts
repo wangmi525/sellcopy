@@ -11,6 +11,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Input is required' }, { status: 400 });
     }
 
+    const supabase = createClientForRequest(req.headers);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check usage limits for free users
+    if (user) {
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', user.id)
+        .single();
+
+      const plan = sub?.plan || 'free';
+
+      if (plan === 'free') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const { count } = await supabase
+          .from('generations')
+          .select('*', { count: 'exact' })
+          .eq('user_id', user.id)
+          .gte('created_at', today.toISOString());
+
+        if ((count || 0) >= 3) {
+          return NextResponse.json({ error: 'Daily free limit reached (3/day). Upgrade to Pro for unlimited generations.' }, { status: 429 });
+        }
+      }
+    }
+
     let result;
     if (bulk && Array.isArray(bulk) && bulk.length <= 10) {
       result = await generateBulk(bulk);
@@ -18,10 +46,9 @@ export async function POST(req: Request) {
       result = await generateCopy({ mode: mode || 'product', input, platform, language: language || 'English', features, tone });
     }
 
-    try {
-      const supabase = createClientForRequest(req.headers);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+    // Save to database
+    if (user) {
+      try {
         await supabase.from('generations').insert({
           user_id: user.id,
           product_name: input.substring(0, 100),
@@ -31,8 +58,8 @@ export async function POST(req: Request) {
           features: features || '',
           result,
         });
-      }
-    } catch {}
+      } catch {}
+    }
 
     return NextResponse.json(result);
   } catch (error: any) {
