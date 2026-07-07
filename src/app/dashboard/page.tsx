@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getSupabase } from '@/lib/supabase-client';
 
 const modes = [
   { id: 'product', label: 'Product Copy', icon: '📦', desc: 'Amazon/Shopify/Etsy listings' },
@@ -63,7 +64,7 @@ function MenuButton() {
               Upgrade Plan
             </Link>
             <div className="border-t border-gray-100 mt-1 pt-1">
-              <button onClick={async () => { const { getSupabase } = await import('@/lib/supabase-client'); getSupabase().auth.signOut().then(() => { window.location.href = '/'; }); }} className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-600 hover:bg-red-50 transition-colors w-full text-left">
+              <button onClick={async () => { getSupabase().auth.signOut().then(() => { window.location.href = '/'; }); }} className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-600 hover:bg-red-50 transition-colors w-full text-left">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Sign Out
               </button>
@@ -147,7 +148,13 @@ function Tool() {
     if (!data.input) return;
     setLoading(true); setError(''); setResult(null);
     try {
-      const res = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      const session = await getSupabase().auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: JSON.stringify(data)
+      });
       const r = await res.json();
       if (r.error) setError(r.error); else setResult(r);
     } catch { setError('Generation failed.'); }

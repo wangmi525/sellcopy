@@ -12,7 +12,14 @@ export async function POST(req: Request) {
     }
 
     const supabase = createClientForRequest(req.headers);
-    const { data: { user } } = await supabase.auth.getUser();
+    const authHeader = req.headers.get('authorization');
+    let user = null;
+
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      user = data.user;
+    }
 
     // Check usage limits for free users
     if (user) {
