@@ -6,15 +6,36 @@ import { useState, useEffect } from 'react';
 
 export default function PricingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState('');
 
   useEffect(() => {
     getSupabase().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
   }, []);
 
+  const handleCheckout = async (priceId: string, planName: string) => {
+    setLoading(planName);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Failed to create checkout. Please try again.');
+      }
+    } catch (err) {
+      alert('Checkout failed. Please try again.');
+    }
+    setLoading('');
+  };
+
   const plans = [
-    { name: 'Free', price: '$0', period: '/forever', desc: 'Try before you buy', features: ['3 generations/day', 'Amazon & Shopify', 'Basic templates', 'English only'], cta: isLoggedIn ? 'Go to Dashboard' : 'Get Started', href: isLoggedIn ? '/dashboard' : '/auth', highlight: false },
-    { name: 'Pro', price: '$9.9', period: '/month', desc: 'For serious sellers', features: ['Unlimited generations', 'All platforms', 'Multi-language', 'SEO optimization', 'Generation history', 'Priority support'], cta: isLoggedIn ? 'Upgrade to Pro' : 'Start Pro', href: '#', highlight: true },
-    { name: 'Business', price: '$19.9', period: '/month', desc: 'For teams & agencies', features: ['Everything in Pro', 'API access', 'Team collaboration', 'Custom templates', 'Bulk generation', 'Dedicated support'], cta: isLoggedIn ? 'Upgrade to Business' : 'Start Business', href: '#', highlight: false },
+    { name: 'Free', price: '$0', period: '/forever', desc: 'Try before you buy', features: ['3 generations/day', 'Amazon & Shopify', 'Basic templates', 'English only'], cta: isLoggedIn ? 'Go to Dashboard' : 'Get Started', href: isLoggedIn ? '/dashboard' : '/auth', priceId: null, highlight: false },
+    { name: 'Pro', price: '$9.9', period: '/month', desc: 'For serious sellers', features: ['Unlimited generations', 'All platforms', 'Multi-language', 'SEO optimization', 'Generation history', 'Priority support'], cta: isLoggedIn ? 'Upgrade to Pro' : 'Start Pro', priceId: 'price_1Tq7dA8AzvLpbRULWh8viK8N', highlight: true },
+    { name: 'Business', price: '$19.9', period: '/month', desc: 'For teams & agencies', features: ['Everything in Pro', 'API access', 'Team collaboration', 'Custom templates', 'Bulk generation', 'Dedicated support'], cta: isLoggedIn ? 'Upgrade to Business' : 'Start Business', priceId: 'price_1Tq7fG8AzvLpbRULWmdAd5fN', highlight: false },
   ];
 
   return (
@@ -49,10 +70,16 @@ export default function PricingPage() {
                   <span className="text-[40px] font-bold text-gray-900">{p.price}</span>
                   <span className="text-[14px] text-gray-400">{p.period}</span>
                 </div>
-                {p.highlight ? (
-                  <button onClick={() => alert('Stripe checkout coming soon! Contact support for manual upgrade.')} className={`w-full py-3 rounded-xl text-[13px] font-semibold transition-colors bg-blue-600 text-white hover:bg-blue-700`}>{p.cta}</button>
+                {p.priceId ? (
+                  <button
+                    onClick={() => handleCheckout(p.priceId!, p.name)}
+                    disabled={loading === p.name}
+                    className={`w-full py-3 rounded-xl text-[13px] font-semibold transition-colors ${p.highlight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-900 text-white hover:bg-gray-800'} disabled:opacity-50`}
+                  >
+                    {loading === p.name ? 'Redirecting to Stripe...' : p.cta}
+                  </button>
                 ) : (
-                  <Link href={p.href} className={`block w-full py-3 rounded-xl text-[13px] font-semibold text-center transition-colors bg-gray-900 text-white hover:bg-gray-800`}>{p.cta}</Link>
+                  <Link href={p.href} className="block w-full py-3 rounded-xl text-[13px] font-semibold text-center transition-colors bg-gray-900 text-white hover:bg-gray-800">{p.cta}</Link>
                 )}
                 <ul className="mt-8 space-y-3">
                   {p.features.map((f, j) => <li key={j} className="flex items-center gap-2.5 text-[13px] text-gray-600"><svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{f}</li>)}
