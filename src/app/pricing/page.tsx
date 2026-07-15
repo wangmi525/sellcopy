@@ -34,8 +34,8 @@ export default function PricingPage() {
 
   const plans = [
     { name: 'Free', price: '$0', period: '/forever', desc: 'Try before you buy', features: ['3 generations/day', 'Amazon & Shopify', 'Basic templates', 'English only'], cta: isLoggedIn ? 'Go to Dashboard' : 'Get Started', href: isLoggedIn ? '/dashboard' : '/auth', priceId: null, highlight: false },
-    { name: 'Pro', price: '$9.9', period: '/month', desc: 'For serious sellers', features: ['Unlimited generations', 'All platforms', 'Multi-language', 'SEO optimization', 'Generation history', 'Priority support'], cta: isLoggedIn ? 'Upgrade to Pro' : 'Start Pro', priceId: 'price_1Tq7dA8AzvLpbRULWh8viK8N', highlight: true },
-    { name: 'Business', price: '$19.9', period: '/month', desc: 'For teams & agencies', features: ['Everything in Pro', 'API access', 'Team collaboration', 'Custom templates', 'Bulk generation', 'Dedicated support'], cta: isLoggedIn ? 'Upgrade to Business' : 'Start Business', priceId: 'price_1Tq7fG8AzvLpbRULWmdAd5fN', highlight: false },
+    { name: 'Pro', price: '$9.9', period: '/month', desc: 'For serious sellers', features: ['Unlimited generations', 'All platforms', 'Multi-language', 'SEO optimization', 'Generation history', 'Priority support'], cta: isLoggedIn ? 'Upgrade to Pro' : 'Start Pro', priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || '', highlight: true },
+    { name: 'Business', price: '$19.9', period: '/month', desc: 'For teams & agencies', features: ['Everything in Pro', 'API access', 'Team collaboration', 'Custom templates', 'Bulk generation', 'Dedicated support'], cta: isLoggedIn ? 'Upgrade to Business' : 'Start Business', priceId: process.env.NEXT_PUBLIC_STRIPE_BUSINESS_PRICE_ID || '', highlight: false },
   ];
 
   return (
@@ -79,7 +79,7 @@ export default function PricingPage() {
                     {loading === p.name ? 'Redirecting to Stripe...' : p.cta}
                   </button>
                 ) : (
-                  <Link href={p.href} className="block w-full py-3 rounded-xl text-[13px] font-semibold text-center transition-colors bg-gray-900 text-white hover:bg-gray-800">{p.cta}</Link>
+                  <Link href={p.href || '/auth'} className="block w-full py-3 rounded-xl text-[13px] font-semibold text-center transition-colors bg-gray-900 text-white hover:bg-gray-800">{p.cta}</Link>
                 )}
                 <ul className="mt-8 space-y-3">
                   {p.features.map((f, j) => <li key={j} className="flex items-center gap-2.5 text-[13px] text-gray-600"><svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{f}</li>)}
